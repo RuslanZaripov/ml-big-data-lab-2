@@ -23,6 +23,14 @@ pipeline {
             }
         }
 
+         stage('Use .env File') {
+            steps {
+                withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
+                    bat 'xcopy %ENV_FILE% %REPO_DIR%\\.env'
+                }
+            }
+        }
+
         stage('Checkout repo dir') {
             steps {
                 dir(REPO_DIR) {
@@ -34,14 +42,6 @@ pipeline {
         stage('Login') {
             steps {
                 bat 'chcp 65001 && docker login -u %DOCKERHUB_CREDS_USR% -p %DOCKERHUB_CREDS_PSW%'
-            }
-        }
-
-        stage('Use .env File') {
-            steps {
-                withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
-                    bat 'xcopy $ENV_FILE %REPO_DIR%\\.env'
-                }
             }
         }
 
