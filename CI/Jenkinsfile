@@ -4,11 +4,11 @@ pipeline {
     environment {
         DOCKERHUB_CREDS = credentials('ml-big-data')
         LOCALE = 'en_US.UTF-8'
-        LC_ALL = LOCALE
-        LANG    = LOCALE
-        LANGUAGE = LOCALE
+        LC_ALL = "${LOCALE}"
+        LANG    = "${LOCALE}"
+        LANGUAGE = "${LOCALE}"
         REPO_DIR = 'ml-big-data-lab-2'
-        CONTAINER_NAME = REPO_DIR
+        CONTAINER_NAME = "${REPO_DIR}"
     }
 
     options {
