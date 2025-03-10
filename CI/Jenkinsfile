@@ -37,6 +37,18 @@ pipeline {
             }
         }
 
+        stages {
+            stage('Use .env File') {
+                steps {
+                    dir(REPO_DIR) {
+                        withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
+                            bat 'xcopy $ENV_FILE .env'
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Create and run docker container') {
             steps {
                 dir(REPO_DIR) {
