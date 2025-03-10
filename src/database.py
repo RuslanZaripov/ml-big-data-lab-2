@@ -18,12 +18,6 @@ class RedisClient:
 
         load_dotenv(override=True)
 
-        print('REDIS CREDS:',
-              os.getenv('REDIS_HOST'),
-              os.getenv('REDIS_PORT'),
-              os.getenv('REDIS_DB'),
-              os.getenv('REDIS_PASSWORD'))
-
         self.client = Redis(
             host=os.getenv('REDIS_HOST'),
             port=int(os.getenv('REDIS_PORT')),
@@ -111,14 +105,7 @@ class RedisClient:
         """
         if self.client:
             self.client.close()
-            self.log.info("Redis client connection closed.")
-
-    def __del__(self):
-        """
-        Destructor to ensure the Redis client is closed when the object is deleted.
-        """
-        self.close()
-
 
 if __name__ == "__main__":
     redis_client = RedisClient()
+    redis_client.close()
