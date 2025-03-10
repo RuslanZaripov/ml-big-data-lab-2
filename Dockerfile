@@ -2,8 +2,6 @@ FROM python:3.8-slim
 
 RUN apt-get update && apt-get install -y curl
 
-RUN apt-get install redis-server
-
 ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
