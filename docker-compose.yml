@@ -1,12 +1,14 @@
 services:
-   web:
-       build: .
-       command: bash -c "
+    web:
+        build: .
+        command: bash -c "
             python src/preprocess.py 
             && python src/train.py 
             && python src/predict.py -m LOG_REG -t func
             && coverage run src/unit_tests/test_preprocess.py
             && coverage run -a src/unit_tests/test_training.py
+            && coverage run -a src/unit_tests/test_database.py
+            && coverage run -a src/unit_tests/test_app.py
             && coverage report -m
             && (python src/app.py --model LOG_REG &) 
             && sleep 30
@@ -14,6 +16,13 @@ services:
             && curl -X POST http://localhost:8000/predict \
                     -H 'Content-Type":" application/json' \
                     --data-binary @tests/test_0.json"
-       ports:
-           - 8000:8000
-       image: zarus03/ml-big-data-lab-1:latest
+        ports:
+            - 8000:8000
+        image: zarus03/ml-big-data-lab-1:latest
+    redis:
+        image: redis:latest
+        command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
+        ports:
+            - 6379:6379
+        env_file:
+            - .env
