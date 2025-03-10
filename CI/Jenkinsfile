@@ -26,7 +26,7 @@ pipeline {
          stage('Use .env File') {
             steps {
                 withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
-                    bat 'xcopy /F %ENV_FILE% %REPO_DIR% && type .env'
+                    bat 'xcopy /F %ENV_FILE% %REPO_DIR%'
                 }
             }
         }
@@ -34,7 +34,7 @@ pipeline {
         stage('Checkout repo dir') {
             steps {
                 dir(REPO_DIR) {
-                    bat 'chcp 65001 && dir'
+                    bat 'chcp 65001 && dir && type .env'
                 }
             }
         }
