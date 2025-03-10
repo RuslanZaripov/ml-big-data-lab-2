@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
 from logger import Logger
+from database import RedisClient
 import pandas as pd
 import traceback
 import sys
@@ -9,6 +10,8 @@ import pickle
 import configparser
 import argparse
 import uvicorn
+import json
+import uuid
 
 SHOW_LOG = True
 
@@ -49,6 +52,8 @@ class WebApp:
         self.app = self._create_app()
         self.log.info('FastAPI app initialized')
 
+        self.database_client = RedisClient()
+
         self.prediction_service = None
 
     def _create_app(self):
@@ -81,10 +86,35 @@ class WebApp:
                 y = pd.json_normalize(input_data.y)
                 score = self.model.score(X, y)
                 pred = self.model.predict(X).tolist()
-                return {"prediction": pred, "score": score}
+
+                prediction_id = str(uuid.uuid4())
+                prediction_data = {
+                    "prediction": pred,
+                    "score": score,
+                    "input_data": input_data.model_dump_json()
+                }
+                self.database_client.set(prediction_id, json.dumps(prediction_data))
+                
+                return {"prediction_id": prediction_id}
             except Exception as e:
                 self.log.error(traceback.format_exc())
                 raise HTTPException(status_code=500, detail=str(e))
+            
+        @app.get("/predictions/{prediction_id}")
+        async def get_prediction(prediction_id: str):
+            """
+            Endpoint for retrieving a prediction from Redis by its ID.
+            
+            Args:
+                prediction_id (str): The ID of the prediction to retrieve.
+            
+            Returns:
+                dict: The prediction data stored in Redis.
+            """
+            prediction_data = self.database_client.get(prediction_id)
+            if prediction_data is None:
+                raise HTTPException(status_code=404, detail="Prediction not found")
+            return json.loads(prediction_data)
 
         return app
 
@@ -96,8 +126,12 @@ class WebApp:
             tuple: Loaded model and scaler.
         """
         try:
-            model = pickle.load(open(self.config[self.args.model]["path"], "rb"))
-            scaler = pickle.load(open(self.config["STD_SCALER"]["path"], "rb"))
+            with open(self.config[self.args.model]["path"], "rb") as model_file:
+                model = pickle.load(model_file)
+            
+            with open(self.config["STD_SCALER"]["path"], "rb") as scaler_file:
+                scaler = pickle.load(scaler_file)
+        
             return model, scaler
         except FileNotFoundError:
             self.log.error(traceback.format_exc())
