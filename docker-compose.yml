@@ -21,7 +21,7 @@ services:
                     --data-binary @tests/test_0.json"
         ports:
             - 8000:8000
-        image: zarus03/ml-big-data-lab-1:latest
+        image: zarus03/ml-big-data-lab-2:latest
     redis:
         image: redis:latest
         command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"

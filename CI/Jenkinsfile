@@ -23,7 +23,7 @@ pipeline {
             }
         }
 
-         stage('Use .env File') {
+        stage('Use .env File') {
             steps {
                 withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
                     bat 'xcopy /F %ENV_FILE% %REPO_DIR%'
