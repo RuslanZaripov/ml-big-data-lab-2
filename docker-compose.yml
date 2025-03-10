@@ -1,6 +1,9 @@
 services:
     web:
         build: .
+        depends_on:
+            redis:
+                condition: service_healthy
         command: bash -c "
             python src/preprocess.py 
             && python src/train.py 
@@ -21,10 +24,12 @@ services:
         image: zarus03/ml-big-data-lab-1:latest
     redis:
         image: redis:latest
-        command: bash -c "
-            apt-get update
-            && apt-get install -y redis-server 
-            && redis-server --requirepass $$REDIS_PASSWORD"
+        healthcheck:
+            test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+            interval: 1s
+            timeout: 2s
+            retries: 10
+        command: bash -c "redis-server --requirepass $$REDIS_PASSWORD"
         ports:
             - 6379:6379
         env_file:

@@ -18,6 +18,12 @@ class RedisClient:
 
         load_dotenv(override=True)
 
+        print('REDIS CREDS:',
+              os.getenv('REDIS_HOST'),
+              os.getenv('REDIS_PORT'),
+              os.getenv('REDIS_DB'),
+              os.getenv('REDIS_PASSWORD'))
+
         self.client = Redis(
             host=os.getenv('REDIS_HOST'),
             port=int(os.getenv('REDIS_PORT')),
