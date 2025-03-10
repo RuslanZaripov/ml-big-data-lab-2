@@ -37,14 +37,10 @@ pipeline {
             }
         }
 
-        stages {
-            stage('Use .env File') {
-                steps {
-                    dir(REPO_DIR) {
-                        withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
-                            bat 'xcopy $ENV_FILE .env'
-                        }
-                    }
+        stage('Use .env File') {
+            steps {
+                withCredentials([file(credentialsId: 'redis_env_props', variable: 'ENV_FILE')]) {
+                    bat 'xcopy $ENV_FILE %REPO_DIR%\\.env'
                 }
             }
         }
