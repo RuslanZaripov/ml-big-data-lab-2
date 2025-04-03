@@ -93,7 +93,19 @@ pipeline {
 
     post {
         always {
-            bat 'chcp 65001 && docker logout'
+            script {
+                bat '''
+                    chcp 65001
+                    echo "Stopping all running containers..."
+                    for /f "tokens=*" %%i in ('docker ps -q') do (
+                        docker stop %%i || echo "Failed to stop container %%i"
+                    )
+                    echo "Performing docker system cleanup..."
+                    docker system prune -f || echo "Docker system prune failed"
+                    docker logout || echo "Docker logout failed"
+                '''
+                cleanWs()
+            }
         }
     }
 }
